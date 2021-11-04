@@ -53,9 +53,9 @@
           ></i>
         </div>
         <ul id="ul-2" :class="{ 'open-list-2': isOpenUl2 }">
-          <li>예정</li>
-          <li>잰행중</li>
-          <li>완료</li>
+          <li @click="gotoExpected">예정</li>
+          <li @click="gotoProceeding">진행중</li>
+          <li @click="gotoCompleted">완료</li>
         </ul>
       </div>
       <div class="items">
@@ -68,9 +68,9 @@
           ></i>
         </div>
         <ul id="ul-3" :class="{ 'open-list-3': isOpenUl3 }">
-          <li>예정</li>
-          <li>잰행중</li>
-          <li>완료</li>
+          <li @click="gotoMyExpected">예정</li>
+          <li @click="gotoMyProceeding">진행중</li>
+          <li @click="gotoMyCompleted">완료</li>
         </ul>
       </div>
       <div class="items">
@@ -146,6 +146,27 @@ export default {
     },
     widthResize() {
       this.windowWidth = window.innerWidth
+    },
+    gotoMain() {
+      this.$router.push('/main')
+    },
+    gotoExpected() {
+      this.$router.push('/survey/state/expected')
+    },
+    gotoProceeding() {
+      this.$router.push('/survey/state/proceeding')
+    },
+    gotoCompleted() {
+      this.$router.push('/survey/state/completed')
+    },
+    gotoMyExpected() {
+      this.$router.push('/my-survey/state/expected')
+    },
+    gotoMyProceeding() {
+      this.$router.push('/my-survey/state/proceeding')
+    },
+    gotoMyCompleted() {
+      this.$router.push('/my-survey/state/completed')
     },
   },
   watch: {

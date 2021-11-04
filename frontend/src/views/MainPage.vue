@@ -16,42 +16,43 @@
     </v-carousel>
     <v-container class="lighten-5" style="min-width: 100%;">
       <v-row>
-        <v-col
-          @click="gotoProceeding"
-          style="min-height: 300px;"
-          cols="12"
-          sm="6"
-        >
+        <v-col style="min-height: 300px;" cols="12" sm="6">
           <div style="border-bottom: 2px solid;">
-            <h2>진행중인 설문</h2>
+            <h2>
+              진행중인 설문
+              <a href="#/survey/state/proceeding" style="color: black;"
+                ><i class="fas fa-plus small"></i
+              ></a>
+            </h2>
+            <v-spacer></v-spacer>
           </div>
           <div class="d-flex justify-space-between" style="margin: 3px 5px;">
             <h4>설문제목</h4>
             <h5>설문날짜</h5>
           </div>
         </v-col>
-        <v-col
-          @click="gotoExpected"
-          style="min-height: 300px;"
-          cols="12"
-          sm="6"
-        >
+        <v-col style="min-height: 300px;" cols="12" sm="6">
           <div style="border-bottom: 2px solid;">
-            <h2>진행예정 설문</h2>
+            <h2>
+              진행예정 설문
+              <a href="#/survey/state/expected" style="color: black;"
+                ><i class="fas fa-plus small"></i
+              ></a>
+            </h2>
           </div>
           <div class="d-flex justify-space-between" style="margin: 3px 5px;">
             <h4>설문제목</h4>
             <h5>설문날짜</h5>
           </div>
         </v-col>
-        <v-col
-          @click="gotoCompleted"
-          style="min-height: 300px;"
-          cols="12"
-          sm="6"
-        >
+        <v-col style="min-height: 300px;" cols="12" sm="6">
           <div style="border-bottom: 2px solid;">
-            <h2>완료된 설문</h2>
+            <h2>
+              완료된 설문
+              <a href="#/survey/state/completed" style="color: black;"
+                ><i class="fas fa-plus small"></i
+              ></a>
+            </h2>
           </div>
           <div class="d-flex justify-space-between" style="margin: 3px 5px;">
             <h4>설문제목</h4>
@@ -91,4 +92,4 @@ export default {
 }
 </script>
 
-<style></style>
+<style scoped></style>

@@ -47,6 +47,8 @@ img {
 }
 a {
 	display: inline-block;
+	text-decoration-line: none;
+
 }
 button {
 	border: 0;

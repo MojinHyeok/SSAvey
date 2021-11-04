@@ -58,6 +58,10 @@
   font-weight: 600;
 }
 
+a {
+  color: #6c7988;
+}
+
 .left-menu .items {
   display: flex;
   width: 198.4px;
