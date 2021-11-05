@@ -177,9 +177,9 @@ export default {
             mySurvey: [],
             survey: [],
           },
-          res => {
-            this.$router.push({ name: 'MainPage' })
-          },
+          // res => {
+          //   this.$router.push({ name: 'MainPage' })
+          // },
         )
       } else {
         alert('name은 3글자 이상 작성해주세요')
