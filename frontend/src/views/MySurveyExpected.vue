@@ -9,21 +9,21 @@
         </v-btn>
       </v-toolbar>
 
-      <v-list three-line v-if="surveys.length != 0">
+      <v-list three-line v-if="surveys.length >= 2">
         <template v-for="(item, index) in surveys">
           <v-subheader
             v-if="item.header"
-            :key="item.header"
+            :key="index"
             v-text="item.header"
           ></v-subheader>
 
           <v-divider
             v-else-if="item.divider"
-            :key="index"
+            :key="index + 1"
             :inset="item.inset"
           ></v-divider>
 
-          <v-list-item v-else :key="item.title">
+          <v-list-item v-else :key="index + 2">
             <v-list-item-content>
               <v-list-item-title v-html="item.title"></v-list-item-title>
               <v-list-item-subtitle
@@ -48,7 +48,7 @@
                 </template>
                 <v-list>
                   <v-list-item>
-                    <v-list-item-title v-if="this.user.id == this.survey.writer"
+                    <v-list-item-title v-if="uid == item.writer"
                       >수정하기
                       <i class="fas fa-pencil fa-sm" style="float: right;"></i
                     ></v-list-item-title>
@@ -96,6 +96,7 @@ export default {
     surveys: [],
     rows: 20,
     currentPage: 1,
+    uid: '',
   }),
   methods: {},
   watch: {
@@ -108,7 +109,6 @@ export default {
           console.log(res.data.data)
           this.rows = res.data.Pagecount * 20
           this.surveys = res.data.data
-
           this.surveys.push({ divider: true, inset: true })
         },
         () => {},
@@ -124,7 +124,7 @@ export default {
         console.log(res.data.data)
         this.rows = res.data.Pagecount * 20
         this.surveys = res.data.data
-
+        this.uid = this.$store.state.uid
         this.surveys.push({ divider: true, inset: true })
       },
       () => {},
