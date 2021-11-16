@@ -33,6 +33,10 @@ public class SurveyService {
 		//할당된 설문,만든 설문 분배하는 작업
 		List<String> target=survey.getTarget();
 		List<String> share=survey.getShare();
+		//할당된 설문 중 작성자가 존재한다면 제거하는 작업
+		if(target.contains(survey.getWriter())) {
+			target.remove(survey.getWriter());
+		}
 		//할당된 설문 분배하는작업
 		for(int i=0;i<target.size();i++) {
 			String temp=target.get(i);
@@ -66,6 +70,16 @@ public class SurveyService {
 				Survey tmp_survey=surveyDao.findById(answer_survey.get(i))
 						.orElseThrow(()-> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
 				result.add(tmp_survey);
+			}
+			Collections.sort(result,(a,b)-> b.getEnd_date().compareTo(a.getEnd_date()));
+		}
+		if(state.equals("COMPLETED")&&temp!=null) {
+			for(int i=0;i<temp.size();i++) {
+				Survey tmp_survey=surveyDao.findById(temp.get(i))
+						.orElseThrow(()-> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
+				if(tmp_survey.getState().toString().equals(state)) {
+					result.add(tmp_survey);					
+				}
 			}
 			Collections.sort(result,(a,b)-> b.getEnd_date().compareTo(a.getEnd_date()));
 		}

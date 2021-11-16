@@ -27,27 +27,96 @@
             </div>
             <div class="content">
               <h4>직책</h4>
-              <input v-model="user.position" :disabled="is_modify" />
+              <v-select
+                v-model="user.position"
+                :items="positions"
+                :label="user.position"
+                required
+                solo
+                :disabled="is_modify"
+              ></v-select>
+              <!-- <input v-model="user.position" :disabled="is_modify" /> -->
             </div>
             <div class="content">
               <h4>기수</h4>
-              <input v-model="user.generation" :disabled="is_modify" />
+              <v-select
+                v-if="user.position == '교육생'"
+                v-model="user.generation"
+                :items="generations"
+                :label="user.generation"
+                dense
+                solo
+                :disabled="is_modify"
+              ></v-select>
+              <!-- <input v-model="user.generation" :disabled="is_modify" /> -->
             </div>
             <div class="content">
               <h4>지역</h4>
-              <input v-model="user.area" :disabled="is_modify" />
+              <v-select
+                v-if="
+                  user.position == '교육생' &&
+                    (user.generation == '5' || user.generation == '5기')
+                "
+                v-model="user.area"
+                :items="regions"
+                :label="user.area"
+                기
+                dense
+                solo
+                :disabled="is_modify"
+              ></v-select>
+              <v-select
+                v-if="
+                  user.position == '교육생' &&
+                    (user.generation == '6' || user.generation == '6기')
+                "
+                v-model="user.area"
+                :items="regions2"
+                :label="user.area"
+                dense
+                solo
+                :disabled="is_modify"
+              ></v-select>
+              <!-- <input v-model="user.area" :disabled="is_modify" /> -->
             </div>
             <div class="content">
               <h4>반</h4>
-              <input v-model="user.group" :disabled="is_modify" />
+              <v-select
+                v-if="user.position == '교육생'"
+                v-model="user.group"
+                :items="clss"
+                :label="user.group"
+                dense
+                solo
+                :disabled="is_modify"
+              ></v-select>
+              <!-- <input v-model="user.group" :disabled="is_modify" /> -->
             </div>
             <div class="content">
               <h4>팀</h4>
-              <input v-model="user.team" :disabled="is_modify" />
+              <v-select
+                v-if="user.position == '교육생'"
+                v-model="user.team"
+                :items="teams"
+                :label="user.team"
+                dense
+                solo
+                :disabled="is_modify"
+              ></v-select>
+              <!-- <input v-model="user.team" :disabled="is_modify" /> -->
             </div>
             <div class="content">
               <h4>팀 내 역할</h4>
-              <input v-model="user.team_roll" :disabled="is_modify" />
+              <v-select
+                v-if="user.position == '교육생'"
+                v-model="user.team_role"
+                :items="roles"
+                :label="user.team_roll"
+                dense
+                solo
+                :disabled="is_modify"
+              ></v-select>
+              <!-- <input v-model="user.team_roll" :disabled="is_modify" /> -->
             </div>
           </div>
         </div>
@@ -79,40 +148,6 @@
             color="warning"
             ><i class="fas fa-window-close fa-sm"></i>취소</v-btn
           >
-          <v-btn light class="mx-5 my-5" color="error">
-            <i class="fas fa-times-circle"></i>회원탈퇴
-          </v-btn>
-          <v-menu bottom :offset-x="offset">
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn color="primary" dark v-bind="attrs" v-on="on">
-                <i class="fas fa-ellipsis-v"></i>
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item>
-                <v-list-item-title
-                  >결과보기
-                  <i class="fas fa-file-alt fa-sm" style="float: right;"></i
-                ></v-list-item-title>
-              </v-list-item>
-              <v-divider></v-divider>
-              <v-list-item>
-                <v-list-item-title
-                  >공유
-                  <i class="fas fa-share-alt fa-sm" style="float: right;"></i
-                ></v-list-item-title>
-              </v-list-item>
-              <v-divider></v-divider>
-              <v-list-item>
-                <v-list-item-title
-                  >삭제<i
-                    class="fas fa-trash-alt fa-sm"
-                    style="float: right;"
-                  ></i
-                ></v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
         </v-row>
       </v-card-actions>
     </v-card>
@@ -126,6 +161,37 @@ export default {
       user: {},
       is_modify: true,
       offset: true,
+      positions: ['교육생', '컨설턴트', '교육프로', '교육코치'],
+      generations: ['5기', '6기'],
+      roles: ['없음', '팀장', '팀원'],
+      regions: ['서울', '대전', '광주', '구미'],
+      regions2: ['서울', '대전', '광주', '구미', '부울경'],
+      clss: [
+        '1반',
+        '2반',
+        '3반',
+        '4반',
+        '5반',
+        '6반',
+        '7반',
+        '8반',
+        '9반',
+        '10반',
+        '기업연계',
+      ],
+      teams: [
+        '없음',
+        '1팀',
+        '2팀',
+        '3팀',
+        '4팀',
+        '5팀',
+        '6팀',
+        '7팀',
+        '8팀',
+        '9팀',
+        '10팀',
+      ],
     }
   },
   methods: {
@@ -142,7 +208,7 @@ export default {
           email: this.user.email,
           name: this.user.name,
           position: this.user.position,
-          generation: this.user.generation,
+          generation: this.user.generation.charAt(0, 1) * 1,
           area: this.user.area,
           group: this.user.group,
           team: this.user.team,
@@ -150,6 +216,7 @@ export default {
           template: this.user.template,
           mySurvey: this.user.mySurvey,
           survey: this.user.survey,
+          answer_survey: this.user.answer_survey,
         },
         res => {
           alert(res.data.message)

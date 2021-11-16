@@ -15,12 +15,17 @@ import SurveyAnswer from '@/views/SurveyAnswer.vue'
 import SettingPage from '@/views/SettingPage.vue'
 import Profile from '@/views/Profile.vue'
 import Template from '@/components/SurveyEdit/Template.vue'
+import Testcomponent from '@/components/SurveyResult/MySurveyAnswer.vue'
+import ResultComparison from '@/views/ResultComparison.vue'
+import SurveyResult from '@/views/SurveyResultPage.vue'
+import Test from '@/views/Test.vue'
 Vue.use(VueRouter)
 
 export default new VueRouter({
+  // mode: 'history',
   routes: [
     {
-      path: '/login',
+      path: '/',
       name: 'Login',
       component: LoginPage,
       meta: { auth: false },
@@ -86,7 +91,7 @@ export default new VueRouter({
       meta: { auth: true },
     },
     {
-      path: '/answer/survey',
+      path: '/answer/survey/:sid',
       name: 'SurveyAnswer',
       component: SurveyAnswer,
       meta: { auth: true },
@@ -107,6 +112,30 @@ export default new VueRouter({
       path: '/templete',
       name: 'Templete',
       component: Template,
+      meta: { auth: true },
+    },
+    {
+      path: '/compare',
+      name: 'ResultComparison',
+      component: ResultComparison,
+      meta: { auth: true },
+    },
+    {
+      path: '/testcomponent',
+      name: 'Testcomponent',
+      component: Testcomponent,
+      meta: { auth: true },
+    },
+    {
+      path: '/test',
+      name: 'Test',
+      component: Test,
+      meta: { auth: true },
+    },
+    {
+      path: '/survey-result/:sid',
+      name: 'SurveyResult',
+      component: SurveyResult,
       meta: { auth: true },
     },
   ],

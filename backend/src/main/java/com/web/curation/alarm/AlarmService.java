@@ -3,6 +3,10 @@ package com.web.curation.alarm;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.web.curation.error.CustomException;
+import com.web.curation.error.ErrorCode;
+import com.web.curation.member.User;
+import com.web.curation.member.UserDao;
 import com.web.curation.survey.State;
 import com.web.curation.survey.Survey;
 import com.web.curation.survey.SurveyDao;
@@ -17,26 +21,29 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Timestamp;
-import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Slf4j
 @AllArgsConstructor
 @Service
 public class AlarmService{
-    private final String TOKEN = "uieydcqsspf87n6d7xo3kugp7r";
-
     private SurveyDao surveyDao;
+    private UserDao userDao;
     private HashMap<String, ThreadPoolTaskScheduler> schedulerHashMap;
 
 
     public void setAlarmSchdule(String sid, LocalDateTime startDateTime, LocalDateTime endDateTime){
         ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
         threadPoolTaskScheduler.initialize();
+        threadPoolTaskScheduler.setThreadNamePrefix(sid + "-");
+
 
         Date startDate = Timestamp.valueOf(startDateTime);
         Date endDate = Timestamp.valueOf(endDateTime);
+        log.info("startDate : " + startDate);
+        log.info("endDate : " + endDate);
 
         threadPoolTaskScheduler.schedule(startSurvey(), startDate);
         threadPoolTaskScheduler.schedule(closeSurvey(), endDate);
@@ -47,9 +54,12 @@ public class AlarmService{
     public void editAlarmSchedule(String sid, LocalDateTime startDateTime, LocalDateTime endDateTime){
         ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
         threadPoolTaskScheduler.initialize();
+        threadPoolTaskScheduler.setThreadNamePrefix(sid + "-");
 
         Date startDate = Timestamp.valueOf(startDateTime);
         Date endDate = Timestamp.valueOf(endDateTime);
+        log.info("startDate : " + startDate);
+        log.info("endDate : " + endDate);
 
         threadPoolTaskScheduler.schedule(startSurvey(), startDate);
         threadPoolTaskScheduler.schedule(closeSurvey(), endDate);
@@ -62,21 +72,17 @@ public class AlarmService{
         return () -> {
             String fullName = Thread.currentThread().getName();
             String prefixName = fullName.substring(0, fullName.indexOf("-"));
-            System.out.println(prefixName);
+            log.info("Survey Start, threadName : " + fullName);
 
-            Optional<Survey> survey = surveyDao.findById(prefixName);
-            survey.get().setState(State.PROCEEDING);
-            mattermostAlarm(survey.get().getTitle(), survey.get().getEnd_date(), survey.get().getTarget());
+            Survey survey = surveyDao.findById(prefixName).get();
+            survey.setState(State.PROCEEDING);
 
-            surveyDao.save(survey.get());
+            String message = "#### " + survey.getTitle() + " 설문 시작\n기간: "
+                    + survey.getStart_date().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")) + " ~ "
+                    + survey.getEnd_date().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
 
-//            for(int i = 0; i < schedulerArr.size(); i++){
-//                if(Thread.currentThread().getName().contains(schedulerArr.get(i).getThreadNamePrefix())){
-//                    schedulerArr.get(i).shutdown();
-//                    schedulerArr.remove(i);
-//                    break;
-//                }
-//            }
+            mattermostAlarm(survey.getWriter(), survey.getTarget(), message);
+            surveyDao.save(survey);
         };
     }
 
@@ -84,34 +90,32 @@ public class AlarmService{
         return () -> {
             String fullName = Thread.currentThread().getName();
             String prefixName = fullName.substring(0, fullName.indexOf("-"));
-            System.out.println(prefixName);
+            log.info("Survey End, threadName : " + fullName);
 
-            Optional<Survey> survey = surveyDao.findById(prefixName);
-            survey.get().setState(State.PROCEEDING);
-            mattermostAlarm(survey.get().getTitle(), survey.get().getEnd_date(), survey.get().getTarget());
+            Survey survey = surveyDao.findById(prefixName).get();
+            survey.setState(State.COMPLETED);
+            surveyDao.save(survey);
 
-            surveyDao.save(survey.get());
-
-//            for(int i = 0; i < schedulerArr.size(); i++){
-//                if(Thread.currentThread().getName().contains(schedulerArr.get(i).getThreadNamePrefix())){
-//                    schedulerArr.get(i).shutdown();
-//                    schedulerArr.remove(i);
-//                    break;
-//                }
-//            }
+            schedulerHashMap.get(prefixName).shutdown();
+            schedulerHashMap.remove(prefixName);
         };
     }
 
-    private void mattermostAlarm(String title, LocalDateTime endDate, List<String> targetMember){
-        for(String uid : targetMember){
-            String channelId = getDirectChannelId(uid);
-            sendPosts(channelId, title, endDate);
+    public void mattermostAlarm(String sendMember, List<String> targetMembers, String message){
+        User user = userDao.findById(sendMember)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        String token = user.getToken();
+
+        log.info("postAlarm " + sendMember + " -> " + Arrays.toString(targetMembers.toArray()));
+
+        for(String targetMember : targetMembers){
+            String channelId = getDirectChannelId(token, sendMember, targetMember);
+            sendPosts(token, channelId, message);
         }
     }
 
-    private String getDirectChannelId(String uid) {
+    private String getDirectChannelId(String token, String sendMember, String targetMember) {
         String channelId = null;
-        String serverUid="o1ojzjw173d17c3itj67o5k5do";
         HttpURLConnection conn = null;
 
         try {
@@ -120,11 +124,11 @@ public class AlarmService{
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
             conn.setRequestProperty("Content-type", "application/json");
-            conn.setRequestProperty("Authorization", "Bearer " + TOKEN);
+            conn.setRequestProperty("Authorization", "Bearer " + token);
 
             JsonArray data = new JsonArray();
-            data.add(serverUid);
-            data.add(uid);
+            data.add(sendMember);
+            data.add(targetMember);
 
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
 
@@ -161,7 +165,7 @@ public class AlarmService{
         return channelId;
     }
 
-    private void sendPosts(String channelId, String title, LocalDateTime endDate) {
+    private void sendPosts(String token, String channelId, String message) {
         HttpURLConnection conn = null;
 
         try {
@@ -170,12 +174,10 @@ public class AlarmService{
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
             conn.setRequestProperty("Content-type", "application/json");
-            conn.setRequestProperty("Authorization", "Bearer " + TOKEN);
-
-            Duration remainDuration = Duration.between(LocalDateTime.now(), endDate);
+            conn.setRequestProperty("Authorization", "Bearer " + token);
 
             JSONObject data = new JSONObject();
-            data.put("message",title + " 설문이 " + remainDuration.toDays() + "일 " + (remainDuration.toHours()  - remainDuration.toDays() * 24) + "시 " + (remainDuration.toMinutes() - remainDuration.toHours() * 60) + "분 남았습니다." );
+            data.put("message", message);
             data.put("channel_id", channelId);
 
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
