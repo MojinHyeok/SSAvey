@@ -80,7 +80,7 @@
           </button>
         </div>
         <!-- 양식 -->
-        <div v-show="isClkFormMenu">
+        <div v-show="isClkFormMenu" style="width:100%;">
           <div class="sub-title">
             <p class="sub-title-text">드래그해서</p>
             <p class="sub-title-text">설문지를 생성하세요.</p>
@@ -571,6 +571,7 @@ export default {
         ) {
           this.survey.use_template = false
         }
+        console.log('??')
         // this.survey와 해당 탬플릿들중 useTemplateIndex인 템플릿과
         // title, explain, 실명여부비교
         // q_option들은 문자열로 비교(JSON으로)

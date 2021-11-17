@@ -78,8 +78,8 @@ public class AlarmService{
             survey.setState(State.PROCEEDING);
 
             String message = "#### " + survey.getTitle() + " 설문 시작\n기간: "
-                    + survey.getStart_date().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")) + " ~ "
-                    + survey.getEnd_date().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
+                    + survey.getStart_date().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) + " ~ "
+                    + survey.getEnd_date().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
             mattermostAlarm(survey.getWriter(), survey.getTarget(), message);
             surveyDao.save(survey);
@@ -107,6 +107,7 @@ public class AlarmService{
         String token = user.getToken();
 
         log.info("postAlarm " + sendMember + " -> " + Arrays.toString(targetMembers.toArray()));
+        log.info("postAlarm message : " + message);
 
         for(String targetMember : targetMembers){
             String channelId = getDirectChannelId(token, sendMember, targetMember);
